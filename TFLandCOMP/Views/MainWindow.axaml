@@ -1,0 +1,72 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="820"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="TFLandCOMP"
+        x:Class="TFLandCOMP.Views.MainWindow"
+        Width="1600"
+        Height="850">
+
+  <StackPanel>
+
+    <DockPanel>
+      <Menu DockPanel.Dock="Top">
+        <MenuItem Header="_Файл">
+          <MenuItem Header="Создать..."/>
+          <MenuItem Header="Открыть..."/>
+          <MenuItem Header="Сохранить..."/>
+          <MenuItem Header="Сохранить как..."/>
+          <Separator/>
+          <MenuItem Header="Выход"/>
+        </MenuItem>
+        <MenuItem Header="_Правка" Focusable="False">
+          <MenuItem Header="Отменить..."/>
+          <MenuItem Header="Повторить..."/>
+          <MenuItem Header="Вырезать..." Click="OnCut" Focusable="False"/>
+          <MenuItem Header="Копировать..." Click="OnCopy" Focusable="False"/>
+          <MenuItem Header="Вставить..." Click="OnPaste" Focusable="False"/>
+          <MenuItem Header="Удалить..."/>
+          <MenuItem Header="Выделить все..."/>
+        </MenuItem>
+        <MenuItem Header="_Текст">
+          
+        </MenuItem>
+        <MenuItem Header="_Пуск">
+          
+        </MenuItem>
+        <MenuItem Header="_Справка">
+          
+        </MenuItem>
+      </Menu>
+    </DockPanel>
+
+    <ui:CommandBar Margin="0">
+      <ui:CommandBar.PrimaryCommands>
+        <ui:CommandBarButton IconSource="Document" Label="Создать документ" />
+        <ui:CommandBarButton IconSource="Folder" Label="Открыть папку" />
+        <ui:CommandBarButton IconSource="Save" Label="Save" />
+        <ui:CommandBarSeparator />
+        <ui:CommandBarButton IconSource="Undo" Label="Undo" />
+        <ui:CommandBarButton IconSource="Redo" Label="Вперед" />
+        <ui:CommandBarButton IconSource="Copy" Label="Copy" ToolTip.Tip="Копировать" Focusable="False" Click="OnCopy"/>
+        <ui:CommandBarButton IconSource="Cut" Click="OnCut" ToolTip.Tip="Вырезать" Focusable="False" Label="Cut" />
+        <ui:CommandBarButton IconSource="Paste" ToolTip.Tip="Вставить" Label="Paste" Focusable="False" Click="OnPaste"/>
+        <ui:CommandBarSeparator />
+        <ui:CommandBarButton IconSource="PlayFilled" Label="Пуск" />
+      </ui:CommandBar.PrimaryCommands>
+    </ui:CommandBar>
+
+    <!-- TextBox for File Content Input/Output -->
+    <TextBlock Text="Текст из файла:" Margin="10,10,10,5"/>
+    <TextBox x:Name="fileTextBox" Margin="10" Height="300" AcceptsReturn="True"/>
+
+
+    <!-- TextBox for Error Output -->
+    <TextBlock Text="Ошибки:" Margin="10,20,10,5"/>
+    <TextBox Name="errorTextBox" Margin="10" Height="250" AcceptsReturn="True" IsReadOnly="True" Foreground="Red"/>
+  </StackPanel>
+
+</Window>

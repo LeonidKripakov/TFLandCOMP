@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TFLandCOMP.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
+			 
+             mc:Ignorable="d"
+             d:DesignWidth="1600"
+             d:DesignHeight="850"
+             x:Class="TFLandCOMP.Views.MainView"
+			 x:CompileBindings="True"
+             >
+
+	<!-- The root Grid element with rows and columns definition -->
+
+
+
+
+	<Grid Margin="0">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*" />
+		</Grid.ColumnDefinitions>
+
+    <DockPanel>
+      <Menu DockPanel.Dock="Top">
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open..."/>
+          <Separator/>
+          <MenuItem Header="_Exit"/>
+        </MenuItem>
+        <MenuItem Header="_Edit">
+          <MenuItem Header="Copy"/>
+          <MenuItem Header="Paste"/>
+        </MenuItem>
+      </Menu>
+      <TextBlock/>
+    </DockPanel>
+
+
+    <ui:CommandBar Margin="0,50, 0,0">
+      <ui:CommandBar.PrimaryCommands>
+        <ui:CommandBarButton IconSource="Save" Label="Save" />
+        <ui:CommandBarButton IconSource="Undo" Label="Undo" />
+        <ui:CommandBarSeparator />
+        
+      </ui:CommandBar.PrimaryCommands>
+      <ui:CommandBar.SecondaryCommands>
+        <ui:CommandBarButton IconSource="Cut" Label="Cut" />
+        <ui:CommandBarButton IconSource="Copy" Label="Copy" />
+        <ui:CommandBarButton IconSource="Paste" Label="Paste" />
+      </ui:CommandBar.SecondaryCommands>
+    </ui:CommandBar>
+		
+
+		<!-- NavigationView part -->
+		
+
+	</Grid>
+</UserControl>
