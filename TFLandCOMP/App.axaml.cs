@@ -1,6 +1,10 @@
-using Avalonia;
+п»їusing Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+
+using AvaloniaEdit;
+
+
 using TFLandCOMP.ViewModels;
 using TFLandCOMP.Views;
 
@@ -9,15 +13,16 @@ namespace TFLandCOMP
 {
     public class App : Application
     {
-        
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            
         }
 
         public override void OnFrameworkInitializationCompleted()
         {
-            // Создаем единственный экземпляр DatabaseService
+            
 
 
 

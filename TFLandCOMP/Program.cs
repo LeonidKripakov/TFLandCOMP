@@ -1,7 +1,6 @@
 ﻿using System;
 using Avalonia;
 
-using Npgsql;
 
 namespace TFLandCOMP
 {
@@ -13,8 +12,8 @@ namespace TFLandCOMP
         [STAThread]
         public static void Main(string[] args)
         {
-            // Включаем поддержку unmapped enums
-            NpgsqlConnection.GlobalTypeMapper.EnableUnmappedTypes();
+            
+           
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

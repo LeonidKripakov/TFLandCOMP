@@ -1,15 +1,125 @@
-using Avalonia;
+п»їusing Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
+using AvaloniaEdit;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
+using TFLandCOMP.ViewModels;
+
 namespace TFLandCOMP.Views
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        // РџРѕР»Рµ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїСѓС‚Рё С„Р°Р№Р»Р° (РµСЃР»Рё null вЂ“ С„Р°Р№Р» РЅРѕРІС‹Р№)
+        private string currentFilePath = null;
+
+        // РЎРІРѕР№СЃС‚РІРѕ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РёРјРµРЅРё С„Р°Р№Р»Р°
+        private string _currentFileName = "РўРµРєСЃС‚ РёР· С„Р°Р№Р»Р°:";
+        public string CurrentFileName
+        {
+            get => _currentFileName;
+            set
+            {
+                if (_currentFileName != value)
+                {
+                    _currentFileName = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // РЎС‚СЌРєРё РґР»СЏ Undo/Redo (С…СЂР°РЅСЏС‚ С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ С‚РµРєСЃС‚Р° Рё РїРѕР·РёС†РёСЋ РєР°СЂРµС‚РєРё)
+        private Stack<(string text, int caretIndex)> undoStack = new Stack<(string text, int caretIndex)>();
+        private Stack<(string text, int caretIndex)> redoStack = new Stack<(string text, int caretIndex)>();
+
+        // Р¤Р»Р°РіРё РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ РёР·РјРµРЅРµРЅРёР№
+        private bool isInternalUpdate = false;
+        private bool isModified = false;
+        private string lastText = "";
+
+        // Р¤Р»Р°Рі РґР»СЏ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РёСЏ РѕРєРЅР° (РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ)
+        private bool _forceClose = false;
+
+        // РџРµСЂРµС‡РёСЃР»РµРЅРёРµ С‚РёРїРѕРІ РїРѕСЃР»РµРґРЅРµРіРѕ РґРµР№СЃС‚РІРёСЏ (РІСЃС‚Р°РІРєР° РёР»Рё СѓРґР°Р»РµРЅРёРµ)
+        private enum LastActionType { None, Insert, Delete }
+        // Р¤РёРєСЃРёСЂСѓРµРј РїРѕСЃР»РµРґРЅРµРµ РґРµР№СЃС‚РІРёРµ: С‚РёРї, С‚РµРєСЃС‚ РёР·РјРµРЅРµРЅРёСЏ Рё РїРѕР·РёС†РёСЋ
+        private (LastActionType ActionType, string Text, int Position) lastAction = (LastActionType.None, "", 0);
+
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainViewViewModel();
+            // РџРѕР»СѓС‡Р°РµРј СЂРµРґР°РєС‚РѕСЂ РёР· XAML (AvaloniaEdit)
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                fileEditor.TextChanged += (s, e) =>
+                {
+                    var newText = fileEditor.Text;
+                    if (!isInternalUpdate)
+                    {
+                        if (lastText != newText)
+                        {
+                            // РЎРѕС…СЂР°РЅСЏРµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РґР»СЏ Undo/Redo
+                            undoStack.Push((lastText, fileEditor.CaretOffset));
+                            redoStack.Clear();
+                            isModified = true;
+
+                            // Р•СЃР»Рё С‚РµРєСЃС‚ СѓРІРµР»РёС‡РёР»СЃСЏ вЂ“ С„РёРєСЃРёСЂСѓРµРј РІСЃС‚Р°РІРєСѓ, РµСЃР»Рё СѓРјРµРЅСЊС€РёР»СЃСЏ вЂ“ СѓРґР°Р»РµРЅРёРµ
+                            if (newText.Length > lastText.Length)
+                            {
+                                int diff = newText.Length - lastText.Length;
+                                int diffIndex = 0;
+                                while (diffIndex < lastText.Length && lastText[diffIndex] == newText[diffIndex])
+                                    diffIndex++;
+                                string inserted = newText.Substring(diffIndex, diff);
+                                lastAction = (LastActionType.Insert, inserted, diffIndex);
+                            }
+                            else if (newText.Length < lastText.Length)
+                            {
+                                int diff = lastText.Length - newText.Length;
+                                int diffIndex = 0;
+                                while (diffIndex < newText.Length && lastText[diffIndex] == newText[diffIndex])
+                                    diffIndex++;
+                                string deleted = lastText.Substring(diffIndex, diff);
+                                lastAction = (LastActionType.Delete, deleted, diffIndex);
+                            }
+                            else
+                            {
+                                lastAction = (LastActionType.None, "", 0);
+                            }
+                        }
+                        lastText = newText;
+                    }
+                };
+
+                // РР·РјРµРЅРµРЅРёРµ СЂР°Р·РјРµСЂР° С€СЂРёС„С‚Р° СЃ РїРѕРјРѕС‰СЊСЋ РєРѕР»РµСЃРёРєР° РјС‹С€Рё РїСЂРё Р·Р°Р¶Р°С‚РѕРј Ctrl
+                fileEditor.PointerWheelChanged += FileEditor_PointerWheelChanged;
+            }
+        }
+
+        private void FileEditor_PointerWheelChanged(object sender, PointerWheelEventArgs e)
+        {
+            if ((e.KeyModifiers & KeyModifiers.Control) != 0)
+            {
+                var editor = sender as TextEditor;
+                if (editor != null)
+                {
+                    double newSize = editor.FontSize + (e.Delta.Y * 0.1);
+                    newSize = Math.Max(8, Math.Min(72, newSize));
+                    editor.FontSize = newSize;
+                    e.Handled = true;
+                }
+            }
         }
 
         private void InitializeComponent()
@@ -17,64 +127,230 @@ namespace TFLandCOMP.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        // Обработчик для кнопки "Копировать"
+        #region РњРµС‚РѕРґС‹ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»Р°РјРё
+
+        private void OnNewFile(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                SetTextInternal(fileEditor, "");
+                undoStack.Clear();
+                redoStack.Clear();
+                currentFilePath = null;
+                CurrentFileName = "РќРѕРІС‹Р№ С„Р°Р№Р»";
+                isModified = false;
+            }
+        }
+
+        private async void OnOpenFile(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                var openDialog = new OpenFileDialog
+                {
+                    Title = "РћС‚РєСЂС‹С‚СЊ С„Р°Р№Р»",
+                    AllowMultiple = false,
+                    Filters = new List<FileDialogFilter>
+                    {
+                        new FileDialogFilter { Name = "РўРµРєСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹", Extensions = new List<string> { "txt" } }
+                    }
+                };
+                var result = await openDialog.ShowAsync(this);
+                if (result != null && result.Length > 0)
+                {
+                    string fileName = result[0];
+                    if (File.Exists(fileName))
+                    {
+                        string content = await File.ReadAllTextAsync(fileName);
+                        SetTextInternal(fileEditor, content);
+                        undoStack.Clear();
+                        redoStack.Clear();
+                        currentFilePath = fileName;
+                        CurrentFileName = Path.GetFileName(fileName);
+                        isModified = false;
+                    }
+                }
+            }
+        }
+
+        private async void OnSaveFile(object sender, RoutedEventArgs e)
+        {
+            await OnSaveFileAsync();
+        }
+
+        private async void OnSaveFileAS(object sender, RoutedEventArgs e)
+        {
+            await OnSaveAsAsync();
+        }
+
+        private async Task OnSaveFileAsync()
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                if (!string.IsNullOrEmpty(currentFilePath))
+                {
+                    await File.WriteAllTextAsync(currentFilePath, fileEditor.Text ?? "");
+                    isModified = false;
+                }
+                else
+                {
+                    await OnSaveAsAsync();
+                }
+            }
+        }
+
+        private async Task OnSaveAsAsync()
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                var saveDialog = new SaveFileDialog
+                {
+                    Title = "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє...",
+                    Filters = new List<FileDialogFilter>
+                    {
+                        new FileDialogFilter { Name = "РўРµРєСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹", Extensions = new List<string> { "txt" } }
+                    }
+                };
+                string fileName = await saveDialog.ShowAsync(this);
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    currentFilePath = fileName;
+                    await File.WriteAllTextAsync(fileName, fileEditor.Text ?? "");
+                    CurrentFileName = Path.GetFileName(fileName);
+                    isModified = false;
+                }
+            }
+        }
+
+        private void OnExit(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        #endregion
+
+        #region РњРµС‚РѕРґС‹ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
+
         private async void OnCopy(object sender, RoutedEventArgs e)
         {
-            // Получаем элемент fileTextBox из визуального дерева
-            var fileTextBox = this.FindControl<TextBox>("fileTextBox");
-            if (fileTextBox != null)
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
             {
-                int start = fileTextBox.SelectionStart;
-                int end = fileTextBox.SelectionEnd;
-                // Если есть выделение, копируем его, иначе копируем весь текст
-                string textToCopy = (start < end)
-                    ? fileTextBox.Text.Substring(start, end - start)
-                    : fileTextBox.Text;
-
-                if (!string.IsNullOrEmpty(textToCopy))
-                {
-                    await this.Clipboard.SetTextAsync(textToCopy);
-                }
+                string textToCopy = fileEditor.SelectedText;
+                if (string.IsNullOrEmpty(textToCopy))
+                    textToCopy = fileEditor.Text ?? "";
+                await this.Clipboard.SetTextAsync(textToCopy);
             }
         }
 
-        // Обработчик для кнопки "Вырезать"
         private async void OnCut(object sender, RoutedEventArgs e)
         {
-            var fileTextBox = this.FindControl<TextBox>("fileTextBox");
-            if (fileTextBox != null)
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null && !string.IsNullOrEmpty(fileEditor.SelectedText))
             {
-                int start = fileTextBox.SelectionStart;
-                int end = fileTextBox.SelectionEnd;
-                if (start < end)
-                {
-                    // Получаем выделенный текст
-                    string selectedText = fileTextBox.Text.Substring(start, end - start);
-                    // Копируем выделенный текст в буфер обмена
-                    await this.Clipboard.SetTextAsync(selectedText);
-                    // Удаляем выделенный текст с помощью свойства SelectedText
-                    fileTextBox.SelectedText = "";
-                }
+                int caretPos = fileEditor.CaretOffset;
+                string cutText = fileEditor.SelectedText;
+                undoStack.Push((fileEditor.Text ?? "", caretPos));
+                redoStack.Clear();
+                await this.Clipboard.SetTextAsync(cutText);
+                fileEditor.SelectedText = "";
+                // Р¤РёРєСЃРёСЂСѓРµРј РїРѕСЃР»РµРґРЅРµРµ РґРµР№СЃС‚РІРёРµ вЂ“ СѓРґР°Р»РµРЅРёРµ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р±Р»РѕРєР°
+                lastAction = (LastActionType.Delete, cutText, caretPos);
             }
         }
 
-        // Обработчик для кнопки "Вставить"
-        // Вставка производится в fileTextBox по позиции каретки
         private async void OnPaste(object sender, RoutedEventArgs e)
         {
-            var fileTextBox = this.FindControl<TextBox>("fileTextBox");
-            if (fileTextBox != null)
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
             {
                 var clipboardText = await this.Clipboard.GetTextAsync();
                 if (!string.IsNullOrEmpty(clipboardText))
                 {
-                    int caretIndex = fileTextBox.CaretIndex;
-                    // Вставляем текст из буфера обмена в позицию каретки
-                    fileTextBox.Text = fileTextBox.Text.Insert(caretIndex, clipboardText);
-                    // Обновляем позицию каретки
-                    fileTextBox.CaretIndex = caretIndex + clipboardText.Length;
+                    int caret = fileEditor.CaretOffset;
+                    undoStack.Push((fileEditor.Text ?? "", caret));
+                    redoStack.Clear();
+                    SetTextInternal(fileEditor, fileEditor.Text.Insert(caret, clipboardText));
+                    fileEditor.CaretOffset = caret + clipboardText.Length;
+                    // Р¤РёРєСЃРёСЂСѓРµРј РїРѕСЃР»РµРґРЅРµРµ РґРµР№СЃС‚РІРёРµ вЂ“ РІСЃС‚Р°РІРєР°
+                    lastAction = (LastActionType.Insert, clipboardText, caret);
                 }
             }
         }
+
+        private void OnUndo(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null && undoStack.Count > 0)
+            {
+                redoStack.Push((fileEditor.Text ?? "", fileEditor.CaretOffset));
+                var lastState = undoStack.Pop();
+                SetTextInternal(fileEditor, lastState.text);
+                fileEditor.CaretOffset = Math.Min(lastState.caretIndex, (lastState.text ?? "").Length);
+            }
+        }
+
+        private void OnRedo(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null && redoStack.Count > 0)
+            {
+                undoStack.Push((fileEditor.Text ?? "", fileEditor.CaretOffset));
+                var lastState = redoStack.Pop();
+                SetTextInternal(fileEditor, lastState.text);
+                fileEditor.CaretOffset = Math.Min(lastState.caretIndex, (lastState.text ?? "").Length);
+            }
+        }
+
+        // РњРµС‚РѕРґ РїРѕРІС‚РѕСЂРµРЅРёСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РґРµР№СЃС‚РІРёСЏ (РІСЃС‚Р°РІРєР° РёР»Рё СѓРґР°Р»РµРЅРёРµ)
+        private void OnRepeatLastAction(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor == null)
+                return;
+
+            switch (lastAction.ActionType)
+            {
+                case LastActionType.Insert:
+                    {
+                        int caret = fileEditor.CaretOffset;
+                        string newText = fileEditor.Text.Insert(caret, lastAction.Text);
+                        SetTextInternal(fileEditor, newText);
+                        fileEditor.CaretOffset = caret + lastAction.Text.Length;
+                        break;
+                    }
+                case LastActionType.Delete:
+                    {
+                        int caret = fileEditor.CaretOffset;
+                        int deleteLength = lastAction.Text.Length;
+                        if (caret < fileEditor.Text.Length && (caret + deleteLength) <= fileEditor.Text.Length)
+                        {
+                            string newText = fileEditor.Text.Remove(caret, deleteLength);
+                            SetTextInternal(fileEditor, newText);
+                        }
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        private void SetTextInternal(TextEditor editor, string text)
+        {
+            isInternalUpdate = true;
+            editor.Text = text;
+            lastText = text;
+            isInternalUpdate = false;
+        }
+
+        #endregion
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

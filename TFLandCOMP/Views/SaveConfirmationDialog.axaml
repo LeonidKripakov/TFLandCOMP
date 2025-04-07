@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TFLandCOMP.Views.SaveConfirmationDialog"
+        Title="Сохранить изменения?"
+        Width="400" Height="150"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+  <StackPanel Margin="10">
+    <TextBlock Text="У вас есть несохранённые изменения. Сохранить их перед выходом?" TextWrapping="Wrap"/>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+      <Button Content="Сохранить" Click="OnSave" Width="100" Margin="5"/>
+      <Button Content="Не сохранять" Click="OnDontSave" Width="110" Margin="5"/>
+      <Button Content="Отмена" Click="OnCancel" Width="100" Margin="5"/>
+    </StackPanel>
+  </StackPanel>
+</Window>
