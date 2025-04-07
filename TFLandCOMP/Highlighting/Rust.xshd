@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<HighlightingDefinition name="Rust" mainRuleSet="Main">
+  <Color name="Keyword" foreground="#FFCC7832" fontWeight="bold" />
+  <Color name="Type" foreground="#FF88C0D0" />
+  <Color name="Comment" foreground="#FF616161" fontStyle="italic" />
+  <Color name="String" foreground="#FF6A8759" />
+  <Color name="Number" foreground="#FFB5CEA8" />
+  <Color name="Function" foreground="#FFDCDCAA" />
+  <Color name="Punctuation" foreground="#FFD4D4D4" />
+
+  <Keywords name="Keyword">
+    <Word>fn</Word>
+    <Word>let</Word>
+    <Word>mut</Word>
+    <Word>match</Word>
+    <Word>impl</Word>
+    <Word>struct</Word>
+    <Word>enum</Word>
+    <Word>mod</Word>
+    <Word>use</Word>
+    <Word>pub</Word>
+    <Word>crate</Word>
+    <Word>super</Word>
+    <Word>self</Word>
+    <Word>as</Word>
+    <Word>if</Word>
+    <Word>else</Word>
+    <Word>loop</Word>
+    <Word>while</Word>
+    <Word>for</Word>
+    <Word>in</Word>
+    <Word>return</Word>
+    <Word>break</Word>
+    <Word>continue</Word>
+    <Word>const</Word>
+    <Word>static</Word>
+    <Word>trait</Word>
+    <Word>where</Word>
+    <Word>ref</Word>
+    <Word>type</Word>
+    <Word>move</Word>
+    <Word>unsafe</Word>
+    <Word>dyn</Word>
+    <Word>await</Word>
+    <Word>async</Word>
+  </Keywords>
+
+  <Keywords name="Type">
+    <Word>i32</Word>
+    <Word>i64</Word>
+    <Word>u32</Word>
+    <Word>u64</Word>
+    <Word>f32</Word>
+    <Word>f64</Word>
+    <Word>bool</Word>
+    <Word>char</Word>
+    <Word>str</Word>
+    <Word>String</Word>
+    <Word>Option</Word>
+    <Word>Result</Word>
+    <Word>Vec</Word>
+    <Word>Box</Word>
+  </Keywords>
+
+  <RuleSets>
+    <RuleSet name="Main" ignoreCase="false">
+      <Span color="Comment" begin="//" end="\n" />
+      <Span color="Comment" begin="/*" end="*/" />
+      <Span color="String" begin="&quot;" end="&quot;" />
+      <Span color="String" begin="r#&quot;" end="&quot;" />
+      <Regex color="Number">\b[0-9]+(\.[0-9]+)?\b</Regex>
+      <Regex color="Function">\b[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()</Regex>
+      <Regex color="Punctuation">[{}\[\]();,\.]</Regex>
+      <KeywordsRef name="Keyword" />
+      <KeywordsRef name="Type" />
+    </RuleSet>
+  </RuleSets>
+</HighlightingDefinition>

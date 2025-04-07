@@ -18,7 +18,6 @@
 
 
   <Window.DataContext>
-  <!-- Устанавливаем DataContext на экземпляр MainViewViewModel -->
   <vm:MainViewViewModel/>
   </Window.DataContext>
 
@@ -42,7 +41,7 @@
         </MenuItem>
         <MenuItem Header="_Текст"/>
         <MenuItem Header="_Пуск"/>
-        <MenuItem Header="_Справка"/>
+        <MenuItem Header="_Справка" Click="OnHelp"/>
       </Menu>
     </DockPanel>
 
@@ -71,8 +70,7 @@
                               serv:TextEditorBinding.BindableText="{Binding InputText, Mode=TwoWay}"
                               BorderBrush="Red"
                               BorderThickness="1"
-                              
-                              SyntaxHighlighting="Rust"
+                              SyntaxHighlighting="C#"
                               ShowLineNumbers="True"
                               HorizontalAlignment="Stretch"
                               Height="400"

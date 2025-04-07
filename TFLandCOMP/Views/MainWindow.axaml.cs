@@ -5,24 +5,28 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 
 using AvaloniaEdit;
+using AvaloniaEdit.Highlighting.Xshd;
+using AvaloniaEdit.Highlighting;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Xml;
 
 using TFLandCOMP.ViewModels;
+using SkiaSharp;
+using System.Net.NetworkInformation;
 
 namespace TFLandCOMP.Views
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        // Поле для текущего пути файла (если null – файл новый)
         private string currentFilePath = null;
 
-        // Свойство для отображения имени файла
         private string _currentFileName = "Текст из файла:";
         public string CurrentFileName
         {
@@ -37,31 +41,42 @@ namespace TFLandCOMP.Views
             }
         }
 
-        // Стэки для Undo/Redo (хранят текущее состояние текста и позицию каретки)
+
+        private void LoadRustSyntaxHighlighting(TextEditor editor)
+        {
+            //var assembly = Assembly.GetExecutingAssembly();
+
+            //using (Stream s = assembly.GetManifestResourceStream("TFLandCOMP.Highlighting.Rust.xshd"))
+            //{
+            //    using var reader = XmlReader.Create(s);
+
+            //    editor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            //}
+
+            
+        }
+
         private Stack<(string text, int caretIndex)> undoStack = new Stack<(string text, int caretIndex)>();
         private Stack<(string text, int caretIndex)> redoStack = new Stack<(string text, int caretIndex)>();
 
-        // Флаги для отслеживания изменений
         private bool isInternalUpdate = false;
         private bool isModified = false;
         private string lastText = "";
 
-        // Флаг для принудительного закрытия окна (после подтверждения сохранения)
         private bool _forceClose = false;
-
-        // Перечисление типов последнего действия (вставка или удаление)
         private enum LastActionType { None, Insert, Delete }
-        // Фиксируем последнее действие: тип, текст изменения и позицию
         private (LastActionType ActionType, string Text, int Position) lastAction = (LastActionType.None, "", 0);
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = new MainViewViewModel();
-            // Получаем редактор из XAML (AvaloniaEdit)
             var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
             if (fileEditor != null)
             {
+                LoadRustSyntaxHighlighting(fileEditor); 
+               
+                fileEditor.PointerWheelChanged += FileEditor_PointerWheelChanged;
                 fileEditor.TextChanged += (s, e) =>
                 {
                     var newText = fileEditor.Text;
@@ -69,12 +84,10 @@ namespace TFLandCOMP.Views
                     {
                         if (lastText != newText)
                         {
-                            // Сохраняем текущее состояние для Undo/Redo
                             undoStack.Push((lastText, fileEditor.CaretOffset));
                             redoStack.Clear();
                             isModified = true;
 
-                            // Если текст увеличился – фиксируем вставку, если уменьшился – удаление
                             if (newText.Length > lastText.Length)
                             {
                                 int diff = newText.Length - lastText.Length;
@@ -102,7 +115,6 @@ namespace TFLandCOMP.Views
                     }
                 };
 
-                // Изменение размера шрифта с помощью колесика мыши при зажатом Ctrl
                 fileEditor.PointerWheelChanged += FileEditor_PointerWheelChanged;
             }
         }
@@ -258,7 +270,6 @@ namespace TFLandCOMP.Views
                 redoStack.Clear();
                 await this.Clipboard.SetTextAsync(cutText);
                 fileEditor.SelectedText = "";
-                // Фиксируем последнее действие – удаление выбранного блока
                 lastAction = (LastActionType.Delete, cutText, caretPos);
             }
         }
@@ -306,7 +317,6 @@ namespace TFLandCOMP.Views
             }
         }
 
-        // Метод повторения последнего действия (вставка или удаление)
         private void OnRepeatLastAction(object sender, RoutedEventArgs e)
         {
             var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
@@ -347,6 +357,89 @@ namespace TFLandCOMP.Views
             isInternalUpdate = false;
         }
 
+
+
+
+        #endregion
+
+
+
+        // Метод для вызова окна со справкой
+        private async void OnHelp(object sender, RoutedEventArgs e)
+        {
+            string helpText = "Окно справки\n\n" +
+                "Функции работы с документами:\n" +
+                "• Создать документ: Открытие нового пустого файла для начала работы.\n" +
+                "• Открыть документ: Загрузка содержимого существующего текстового файла в редактор.\n" +
+                "• Сохранить документ: Сохранение изменений в текущем файле, а также функция «Сохранить как…» для выбора нового имени или места сохранения.\n\n" +
+                "Функции редактирования текста:\n" +
+                "• Копировать: Копирование выделенного текста (или всего текста, если ничего не выделено) в буфер обмена.\n" +
+                "• Вырезать: Удаление выделенного текста с одновременным копированием его в буфер обмена.\n" +
+                "• Вставить: Вставка текста из буфера обмена в позицию курсора.\n" +
+                "• Отменить действие (Undo): Возврат к предыдущему состоянию документа.\n" +
+                "• Повторить последнее действие: Выполнение последней операции (вставка или удаление) повторно.\n" +
+                "• Повторное действие (Redo): Отмена отменённого действия .\n\n" +
+                "Дополнительные возможности:\n" +
+                "• Подсветка синтаксиса: Автоматическая подсветка синтаксиса для облегчения восприятия и редактирования кода.\n" +
+                "• Нумерация строк: Наличие номеров строк для удобной навигации и поиска ошибок.\n" +
+                "• Вывод ошибок: Ошибки отображаются в виде таблицы, что позволяет быстро находить и устранять их.\n";
+
+            // Создаем новое окно для справки с прокручиваемым содержимым
+            Window helpWindow = new Window
+            {
+                Title = "Справка",
+                Width = 600,
+                Height = 400,
+                Content = new ScrollViewer
+                {
+                    Content = new TextBlock
+                    {
+                        Text = helpText,
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        Margin = new Thickness(10)
+                    }
+                }
+            };
+
+            await helpWindow.ShowDialog(this);
+        }
+
+
+        #region Обработка закрытия окна с диалогом сохранения
+
+        protected override void OnClosing(WindowClosingEventArgs e)
+        {
+            if (!_forceClose && isModified)
+            {
+                e.Cancel = true;
+                ConfirmAndClose();
+            }
+            else
+                base.OnClosing(e);
+        }
+
+        private async void ConfirmAndClose()
+        {
+            var dialog = new SaveConfirmationDialog
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            var result = await dialog.ShowDialog<SaveConfirmationResult>(this);
+            if (result == SaveConfirmationResult.Yes)
+            {
+                await OnSaveFileAsync();
+                isModified = false;
+                _forceClose = true;
+                Close();
+            }
+            else if (result == SaveConfirmationResult.No)
+            {
+                isModified = false;
+
+                Close();
+            }
+        }
+
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -354,3 +447,7 @@ namespace TFLandCOMP.Views
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
+
+
+
+

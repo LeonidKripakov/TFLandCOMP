@@ -15,6 +15,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Highlighting\Rust.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Highlighting\Rust.xshd">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.5" />
     <PackageReference Include="Avalonia.Angle.Windows.Natives" Version="2.1.22087.20231008" />
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.1.0" />
