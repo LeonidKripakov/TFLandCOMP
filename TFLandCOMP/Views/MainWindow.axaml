@@ -5,7 +5,8 @@
         xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         xmlns:ui="using:FluentAvalonia.UI.Controls"
         xmlns:serv="clr-namespace:TFLandCOMP.Services"
-           xmlns:vm="clr-namespace:TFLandCOMP.ViewModels"
+        xmlns:models="clr-namespace:TFLandCOMP.Models"
+        xmlns:vm="clr-namespace:TFLandCOMP.ViewModels"
         x:DataType="vm:MainViewViewModel"
         mc:Ignorable="d"
         d:DesignWidth="1600"
@@ -16,11 +17,9 @@
         Width="1600"
         Height="850">
 
-
   <Window.DataContext>
-  <vm:MainViewViewModel/>
+    <vm:MainViewViewModel/>
   </Window.DataContext>
-
 
   <StackPanel>
     <DockPanel>
@@ -29,7 +28,7 @@
           <MenuItem Header="Создать..." Click="OnNewFile"/>
           <MenuItem Header="Открыть..." Click="OnOpenFile"/>
           <MenuItem Header="Сохранить..." Click="OnSaveFile"/>
-          <MenuItem Header="Сохранить как..."  Click="OnSaveFileAS" />
+          <MenuItem Header="Сохранить как..." Click="OnSaveFileAS"/>
           <MenuItem Header="Выход" Click="OnExit"/>
         </MenuItem>
         <MenuItem Header="_Правка" Focusable="False">
@@ -47,18 +46,18 @@
 
     <ui:CommandBar Margin="0">
       <ui:CommandBar.PrimaryCommands>
-        <ui:CommandBarButton IconSource="Document" Click="OnNewFile" Focusable="False" Label="Создать документ" />
-        <ui:CommandBarButton IconSource="Folder" Click="OnOpenFile" Focusable="False" Label="Открыть папку" />
-        <ui:CommandBarButton IconSource="Save" Click="OnSaveFile" Focusable="False" Label="Save" />
-        <ui:CommandBarSeparator />
-        <ui:CommandBarButton IconSource="Undo" Click="OnUndo" Label="Undo" />
+        <ui:CommandBarButton IconSource="Document" Click="OnNewFile" Focusable="False" Label="Создать документ"/>
+        <ui:CommandBarButton IconSource="Folder" Click="OnOpenFile" Focusable="False" Label="Открыть папку"/>
+        <ui:CommandBarButton IconSource="Save" Click="OnSaveFile" Focusable="False" Label="Save"/>
+        <ui:CommandBarSeparator/>
+        <ui:CommandBarButton IconSource="Undo" Click="OnUndo" Label="Undo"/>
         <ui:CommandBarButton IconSource="Refresh" Content="Повторить последнее действие" Click="OnRepeatLastAction"/>
-        <ui:CommandBarButton IconSource="Redo" Click="OnRedo" Label="Вперед" />
+        <ui:CommandBarButton IconSource="Redo" Click="OnRedo" Label="Вперед"/>
         <ui:CommandBarButton IconSource="Copy" Label="Copy" ToolTip.Tip="Копировать" Focusable="False" Click="OnCopy"/>
-        <ui:CommandBarButton IconSource="Cut" Click="OnCut" ToolTip.Tip="Вырезать" Focusable="False" Label="Cut" />
+        <ui:CommandBarButton IconSource="Cut" Click="OnCut" ToolTip.Tip="Вырезать" Focusable="False" Label="Cut"/>
         <ui:CommandBarButton IconSource="Paste" ToolTip.Tip="Вставить" Label="Paste" Focusable="False" Click="OnPaste"/>
-        <ui:CommandBarSeparator />
-        <ui:CommandBarButton IconSource="PlayFilled"  Command="{Binding RunScanCommand}" Label="Пуск" />
+        <ui:CommandBarSeparator/>
+        <ui:CommandBarButton IconSource="PlayFilled" Command="{Binding RunScanCommand}" Label="Пуск"/>
       </ui:CommandBar.PrimaryCommands>
     </ui:CommandBar>
 
@@ -66,34 +65,33 @@
     <TextBlock Text="Текст из файла:" Margin="10,10,10,5"/>
     <!-- Редактор с подсветкой синтаксиса -->
     <avaloniaEdit:TextEditor x:Name="fileTextEditor"
-                              
-                              serv:TextEditorBinding.BindableText="{Binding InputText, Mode=TwoWay}"
-                              BorderBrush="Red"
-                              BorderThickness="1"
-                              SyntaxHighlighting="C#"
-                              ShowLineNumbers="True"
-                              HorizontalAlignment="Stretch"
-                              Height="400"
-                              VerticalAlignment="Stretch"
-                              FontSize="14" />
+                             serv:TextEditorBinding.BindableText="{Binding InputText, Mode=TwoWay}"
+                             BorderBrush="Red"
+                             BorderThickness="1"
+                             SyntaxHighlighting="C#"
+                             ShowLineNumbers="True"
+                             HorizontalAlignment="Stretch"
+                             Height="400"
+                             VerticalAlignment="Stretch"
+                             FontSize="14"/>
     <!-- Заголовок для ошибок -->
     <TextBlock Text="Ошибки:" Margin="10,20,10,5"/>
     <DataGrid ItemsSource="{Binding Errors}" Margin="10" Height="250" IsReadOnly="True" AutoGenerateColumns="False">
       <DataGrid.Columns>
-        <!-- Для каждой колонки явно указываем, что данные представляют объект ErrorDetail -->
+        <!-- Для каждой колонки указываем, что тип данных ErrorDetail находится в пространстве TFLandCOMP.Models -->
         <DataGridTextColumn Header="Код ошибки" Width="*">
           <DataGridTextColumn.Binding>
-            <Binding Path="ErrorCode" x:DataType="vm:ErrorDetail"/>
+            <Binding Path="ErrorCode" x:DataType="models:ErrorDetail"/>
           </DataGridTextColumn.Binding>
         </DataGridTextColumn>
         <DataGridTextColumn Header="Текст ошибки" Width="2*">
           <DataGridTextColumn.Binding>
-            <Binding Path="ErrorMessage" x:DataType="vm:ErrorDetail"/>
+            <Binding Path="ErrorMessage" x:DataType="models:ErrorDetail"/>
           </DataGridTextColumn.Binding>
         </DataGridTextColumn>
         <DataGridTextColumn Header="Место (Строка:Колонка)" Width="*">
           <DataGridTextColumn.Binding>
-            <Binding Path="Position" x:DataType="vm:ErrorDetail"/>
+            <Binding Path="Position" x:DataType="models:ErrorDetail"/>
           </DataGridTextColumn.Binding>
         </DataGridTextColumn>
       </DataGrid.Columns>

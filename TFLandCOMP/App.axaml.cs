@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Styling;
 
 using AvaloniaEdit;
 
@@ -22,9 +23,9 @@ namespace TFLandCOMP
 
         public override void OnFrameworkInitializationCompleted()
         {
-            
 
 
+            Application.Current.RequestedThemeVariant = ThemeVariant.Light;
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

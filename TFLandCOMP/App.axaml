@@ -30,6 +30,6 @@
 	<Application.Styles>
 		<FluentTheme />
     <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
-		<sty:FluentAvaloniaTheme PreferSystemTheme="False" PreferUserAccentColor="True"/>
+		<sty:FluentAvaloniaTheme  PreferUserAccentColor="True"/>
 	</Application.Styles>
 </Application>
