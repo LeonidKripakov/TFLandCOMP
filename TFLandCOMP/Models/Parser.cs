@@ -29,14 +29,12 @@ namespace TFLandCOMP.Models
                         ErrorMessage = $"Ожидалось ключевое слово 'const', но найдено '{tokens[pos].Value}'.",
                         Position = GetLineAndColumn(input, tokens[pos].StartIndex)
                     });
-                    while (pos < tokens.Count && tokens[pos].Type != TokenType.SEMICOLON)
-                    {
-                        pos++;
-                    }
-                    if (pos < tokens.Count && tokens[pos].Type == TokenType.SEMICOLON)
-                        pos++;
-                    continue;
+
+                    // Вместо пропуска до ';' — обрабатываем как потенциальное объявление
+                    var declErrors = ParseSingleDeclaration(tokens, ref pos, input);
+                    errors.AddRange(declErrors);
                 }
+
                 else
                 {
                     var declErrors = ParseSingleDeclaration(tokens, ref pos, input);

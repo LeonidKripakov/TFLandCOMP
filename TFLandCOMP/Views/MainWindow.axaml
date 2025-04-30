@@ -38,26 +38,34 @@
           <MenuItem Header="Копировать..." Click="OnCopy" Focusable="False"/>
           <MenuItem Header="Вставить..." Click="OnPaste" Focusable="False"/>
         </MenuItem>
-        <MenuItem Header="_Текст"/>
-        <MenuItem Header="_Пуск"/>
+        <MenuItem Header="Текст">
+          <MenuItem Header="Вставить правильный текст" Click="OnInsertCorrectText"/>
+          <MenuItem Header="Вставить неправильный текст" Click="OnInsertIncorrectText"/>
+          <MenuItem Header="1. Постановка задачи" Click="OnShowTask1"/>
+          <MenuItem Header="2. Разработка грамматики" Click="OnShowTask2"/>
+          <MenuItem Header="3. Классификация грамматики" Click="OnShowTask3"/>
+          <MenuItem Header="4. Метод анализа" Click="OnShowTask4"/>
+          <MenuItem Header="5. Диагностика и нейтрализация ошибок" Click="OnShowTask5"/>
+        </MenuItem>
+        <MenuItem Header="Пуск" Command="{Binding RunScanCommand}"/>
         <MenuItem Header="_Справка" Click="OnHelp"/>
       </Menu>
     </DockPanel>
 
     <ui:CommandBar Margin="0">
       <ui:CommandBar.PrimaryCommands>
-        <ui:CommandBarButton IconSource="Document" Click="OnNewFile" Focusable="False" Label="Создать документ"/>
-        <ui:CommandBarButton IconSource="Folder" Click="OnOpenFile" Focusable="False" Label="Открыть папку"/>
-        <ui:CommandBarButton IconSource="Save" Click="OnSaveFile" Focusable="False" Label="Save"/>
+        <ui:CommandBarButton IconSource="Document" Click="OnNewFile" Focusable="False" Label="Создать документ" ToolTip.Tip="Создать документ"/>
+        <ui:CommandBarButton IconSource="Folder" Click="OnOpenFile" Focusable="False" Label="Открыть папку" ToolTip.Tip="Открыть папку"/>
+        <ui:CommandBarButton IconSource="Save" Click="OnSaveFile" Focusable="False" Label="Save" ToolTip.Tip="Сохранить"/>
         <ui:CommandBarSeparator/>
-        <ui:CommandBarButton IconSource="Undo" Click="OnUndo" Label="Undo"/>
-        <ui:CommandBarButton IconSource="Refresh" Content="Повторить последнее действие" Click="OnRepeatLastAction"/>
-        <ui:CommandBarButton IconSource="Redo" Click="OnRedo" Label="Вперед"/>
-        <ui:CommandBarButton IconSource="Copy" Label="Copy" ToolTip.Tip="Копировать" Focusable="False" Click="OnCopy"/>
+        <ui:CommandBarButton IconSource="Undo" Click="OnUndo" Label="Undo" ToolTip.Tip="Отменить"/>
+        <ui:CommandBarButton IconSource="Refresh" Content="Повторить последнее действие" Click="OnRepeatLastAction" ToolTip.Tip="Повторить последнее действие"/>
+        <ui:CommandBarButton IconSource="Redo" Click="OnRedo" Label="Вперед" ToolTip.Tip="Вперед"/>
+        <ui:CommandBarButton IconSource="Copy" Label="Copy" ToolTip.Tip="Копировать" Focusable="False" Click="OnCopy" />
         <ui:CommandBarButton IconSource="Cut" Click="OnCut" ToolTip.Tip="Вырезать" Focusable="False" Label="Cut"/>
         <ui:CommandBarButton IconSource="Paste" ToolTip.Tip="Вставить" Label="Paste" Focusable="False" Click="OnPaste"/>
         <ui:CommandBarSeparator/>
-        <ui:CommandBarButton IconSource="PlayFilled" Command="{Binding RunScanCommand}" Label="Пуск"/>
+        <ui:CommandBarButton IconSource="PlayFilled" Command="{Binding RunScanCommand}" Label="Пуск" ToolTip.Tip="Пуск"/>
       </ui:CommandBar.PrimaryCommands>
     </ui:CommandBar>
 
