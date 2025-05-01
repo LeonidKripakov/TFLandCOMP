@@ -35,6 +35,7 @@ namespace TFLandCOMP.Models
                     errors.AddRange(declErrors);
                 }
 
+
                 else
                 {
                     var declErrors = ParseSingleDeclaration(tokens, ref pos, input);
@@ -125,6 +126,13 @@ namespace TFLandCOMP.Models
                 pos++;
             }
 
+                // --- НОВАЯ ПРОВЕРКА: если после типа встретился идентификатор, а не '=' или число, ругаемся один раз и пропускаем его ---
+                if (pos < tokens.Count && tokens[pos].Type == TokenType.IDENTIFIER)
+                    {
+                AddError("E012", $"Некорректный токен '{tokens[pos].Value}' после типа: ожидался символ '=' или числовой литерал.", tokens[pos].StartIndex);
+                pos++;  // пропускаем «лишний» идентификатор
+                    }
+
             // Ожидаем символ '='
             if (pos < tokens.Count && tokens[pos].Type == TokenType.EQUAL)
             {
@@ -142,14 +150,7 @@ namespace TFLandCOMP.Models
             // Ожидаем числовой литерал
             if (pos < tokens.Count && tokens[pos].Type == TokenType.NUMBER)
             {
-                string numberStr = tokens[pos].Value;
-                if (!Regex.IsMatch(numberStr, @"^\d+(\.\d+)?$"))
-                {
-                    var m = Regex.Match(numberStr, @"^(\d+(\.\d+)?)");
-                    string validPart = m.Success ? m.Value : "";
-                    string invalidPart = numberStr.Substring(validPart.Length);
-                    AddError("E009", $"Неверный формат числового литерала: обнаружены недопустимые символы: '{invalidPart}'", tokens[pos].StartIndex);
-                }
+                // … ваша проверка формата числа …
                 pos++;
             }
             else
@@ -160,7 +161,6 @@ namespace TFLandCOMP.Models
                     AddError("E006", "Ожидалось числовое значение для инициализации, но не найдено.", input.Length);
                 pos++;
             }
-
             // Ожидаем символ ';'
             if (pos < tokens.Count && tokens[pos].Type == TokenType.SEMICOLON)
             {
