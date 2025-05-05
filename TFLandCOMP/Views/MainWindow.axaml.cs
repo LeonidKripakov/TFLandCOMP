@@ -20,6 +20,7 @@ using System.Xml;
 using TFLandCOMP.ViewModels;
 using SkiaSharp;
 using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace TFLandCOMP.Views
 {
@@ -409,38 +410,60 @@ namespace TFLandCOMP.Views
 
         private async void OnShowTask1(object sender, RoutedEventArgs e)
         {
-            string text = "1. Постановка задачи\n\nКонстанты – это элементы данных..." +
-                          "1 Постановка задачи\r\nКонстанты – это элементы данных, значения которых известны и в процессе выполнения программы не изменяются.\r\nДля описания констант в языке Rust используется служебное слово \"const\".\r\nФормат записи: \"const имя_константы: тип = значение;\".\r\nПримеры допустимых констант:\r\n•\tЦелая константа: const MAX_VALUE: i32 = 128;\r\n•\tВещественная константа с фиксированной точкой: const MIN_VALUE: f32 = -39.1;\r\nПарсер, реализованный в курсовой работе на основе разработанной грамматики, будет корректно обрабатывать также следующие записи:\r\n•\tconst a: f32 = .001;\r\n•\tconst c: f32 = 001.123;\r\n\r\n";
+            string text = ReadEmbeddedTextFile("task1.txt");
             await ShowReportWindow(text, "Постановка задачи");
         }
 
         private async void OnShowTask2(object sender, RoutedEventArgs e)
         {
-            string text = "2. Разработка грамматики\n\nОпределим грамматику объявлений..." +
-                          " Определим грамматику объявлений констант языка Rust G[‹Def›] в нотации Хомского с продукциями P:\r\n•\t‹Def› → const ‹Id› : ‹Type› = ‹Number› ;\r\n•\t‹Id› → ‹Letter› ‹IdRem›\r\n•\t‹IdRem› → ‹Letter› ‹IdRem› | ε\r\n•\t‹Type› → f32 | f64\r\n•\t‹Number› → [+|-]‹UnsignedNumber›\r\n•\t‹UnsignedNumber› → ‹Decimal› [E ‹Integer›] | E ‹Integer›\r\n•\t‹Decimal› → [‹UnsignedInt›] . ‹UnsignedInt› | ‹UnsignedInt›\r\n•\t‹Integer› → [+|-] ‹UnsignedInt›\r\n•\t‹UnsignedInt› → ‹Digit›{‹Digit›}\r\n•\tДополнительные определения:\r\n•\t‹Digit› → \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\"\r\n•\t‹Letter› → \"a\" | \"b\" | \"c\" | ... | \"z\" | \"A\" | \"B\" | \"C\" | ... | \"Z\"\r\n•\tСледуя этому формальному описанию, представим компоненты грамматики G[‹Def›]:\r\n•\tZ = ‹Def›\r\n•\tVT = {const, :, f32, f64, =, ;, ., +, -, 0-9, a-z, A-Z}\r\n•\tVN = {‹Def›, ‹Id›, ‹IdRem›, ‹Type›, ‹Number›, ‹UnsignedNumber›, ‹Decimal›, ‹Integer›, ‹UnsignedInt›}\r\n";
+            string text = ReadEmbeddedTextFile("task2.txt");
             await ShowReportWindow(text, "Разработка грамматики");
         }
 
         private async void OnShowTask3(object sender, RoutedEventArgs e)
         {
-            string text = "3. Классификация грамматики\n\nГрамматика G[‹Def›] является автоматной..." +
-                          " Согласно классификации Хомского, грамматика G[‹Def›] является автоматной.\r\nПравила (1)-(7) относятся к классу праворекурсивных продукций (A → aB | a | ε):\r\n1.\t‹Def› → ‹Letter›‹IdRem›\r\n2.\t‹IdRem› → ‹Letter›‹IdRem›\r\n3.\t‹IdRem› → _‹Name›\r\n4.\t‹Name› → ‹Letter›‹NameRem›\r\n5.\t‹NameRem› → ‹Letter›‹NameRem›\r\n6.\t‹NameRem› → =‹Number›\r\n7.\t‹Number› → [+|-]‹UnsignedNumber›;\r\nОтметим, что правила должны быть либо только леворекурсивными, либо только праворекурсивными. Комбинация тех и других не допускается. Однако данная грамматика содержит одновременно леворекурсивные и праворекурсивные продукции (8)-(11), и, следовательно, не является полностью автоматной.\r\n8.\t‹UnsignedNumber› → ‹Decimal›[E‹Integer›] | E‹Integer›\r\n9.\t‹Decimal› → [‹UnsignedInt›].‹UnsignedInt› | ‹UnsignedInt›\r\n10.\t‹Integer› → [+|-]‹UnsignedInt›\r\n11.\t‹UnsignedInt› → ‹Digit›{‹Digit›}\r\n";
+            string text = ReadEmbeddedTextFile("task3.txt");
             await ShowReportWindow(text, "Классификация грамматики");
         }
 
         private async void OnShowTask4(object sender, RoutedEventArgs e)
         {
-            string text = "4. Метод анализа\n\nГрамматика реализуется на графе..." +
-                          " Грамматика G[‹Def›] является автоматной.\r\nПравила (1) – (11) для G[‹Def›] реализованы на графе .\r\nСплошные стрелки на графе характеризуют синтаксически верный разбор; пунктирные символизируют состояние ошибки (ERROR); дуга λ и непомеченные дуги предполагают любой терминальный символ, отличный от указанного из соответствующего узла.\r\n";
+            string text = ReadEmbeddedTextFile("task4.txt");
             await ShowReportWindow(text, "Метод анализа");
         }
 
         private async void OnShowTask5(object sender, RoutedEventArgs e)
         {
-            string text = "5. Диагностика и нейтрализация синтаксических ошибок\n\nМетод Айронса..." +
-                          " Согласно заданию на курсовую работу, необходимо реализовать нейтрализацию синтаксических ошибок, используя метод Айронса.\r\n5.1 Метод Айронса\r\nСуть метода Айронса заключается в следующем:\r\nПри обнаружении ошибки (во входной цепочке в процессе разбора встречается символ, который не соответствует ни одному из ожидаемых символов), входная цепочка символов выглядит следующим образом: Tt, где T – следующий символ во входном потоке (ошибочный символ), t – оставшаяся во входном потоке цепочка символов после T. Алгоритм нейтрализации состоит из следующих шагов:\r\n1. Определяются недостроенные кусты дерева разбора;\r\n2. Формируется множество L – множество остаточных символов недостроенных кустов дерева разбора;\r\n3. Из входной цепочки удаляется следующий символ до тех пор, пока цепочка не примет вид Tt, такой, что U => T, где U ∈ L, то есть до тех пор, пока следующий в цепочке символ T не сможет быть выведен из какого-нибудь из остаточных символов недостроенных кустов.\r\n4. Определяется, какой из недостроенных кустов стал причиной появления символа U в множестве L (иначе говоря, частью какого из недостроенных кустов является символ U).\r\nТаким образом, определяется, к какому кусту в дереве разбора можно «привязать» оставшуюся входную цепочку символов после удаления из текста ошибочного фрагмента.\r\n5.2 Метод Айронса для автоматной грамматики\r\nРазрабатываемый синтаксический анализатор построен на базе автоматной грамматики. Реализация алгоритма Айронса для автоматной грамматики имеет следующую особенность.\r\nДерево разбора с использованием автоматной грамматики представлено на рисунке 2.\r\n \r\nТаким образом, при возникновении синтаксической ошибки в процессе разбора с использованием автоматной грамматики, в дереве разбора всегда будет только один недостроенный куст \r\nПоскольку единственный недостроенный куст – это тот, во время построения которого возникла синтаксическая ошибка, то это единственный куст, к которому можно привязать оставшуюся входную цепочку символов.\r\nПредлагается свести алгоритм нейтрализации к последовательному удалению следующего символа во входной цепочке до тех пор, пока следующий символ не окажется одним из допустимых в данный момент разбора.\r\n \r\n";
+            string text = ReadEmbeddedTextFile("task5.txt");
             await ShowReportWindow(text, "Диагностика и нейтрализация ошибок");
         }
+        private async void OnShowTask6(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task6.txt");
+            await ShowReportWindow(text, "Lexer.cs");
+        }
+        private async void OnShowTask7(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task7.txt");
+            await ShowReportWindow(text, "Parser.cs");
+        }
+
+
+        private string ReadEmbeddedTextFile(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string fullName = assembly.GetManifestResourceNames()
+                                      .FirstOrDefault(x => x.EndsWith(resourceName));
+            if (fullName == null)
+                return $"[Ошибка] Ресурс {resourceName} не найден";
+
+            using (Stream stream = assembly.GetManifestResourceStream(fullName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
 
         private async Task ShowReportWindow(string content, string title)
         {
@@ -508,7 +531,9 @@ namespace TFLandCOMP.Views
             {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            var result = await dialog.ShowDialog<SaveConfirmationResult>(this);
+            await dialog.ShowDialog(this);
+            var result = dialog.Result;
+
             if (result == SaveConfirmationResult.Yes)
             {
                 await OnSaveFileAsync();
@@ -519,10 +544,12 @@ namespace TFLandCOMP.Views
             else if (result == SaveConfirmationResult.No)
             {
                 isModified = false;
-
+                _forceClose = true;
                 Close();
             }
+            // Ничего не делаем, если Cancel
         }
+
 
         #endregion
 

@@ -35,6 +35,8 @@ namespace TFLandCOMP.Models
         EQUAL,
         NUMBER,
         SEMICOLON,
+        INVALID_IDENTIFIER,
         UNKNOWN
     }
+
 }

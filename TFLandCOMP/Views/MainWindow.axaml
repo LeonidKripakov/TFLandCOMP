@@ -46,6 +46,8 @@
           <MenuItem Header="3. Классификация грамматики" Click="OnShowTask3"/>
           <MenuItem Header="4. Метод анализа" Click="OnShowTask4"/>
           <MenuItem Header="5. Диагностика и нейтрализация ошибок" Click="OnShowTask5"/>
+          <MenuItem Header="6. Lexer.cs" Click="OnShowTask6"/>
+          <MenuItem Header="7. Parser.cs" Click="OnShowTask7"/>
         </MenuItem>
         <MenuItem Header="Пуск" Command="{Binding RunScanCommand}"/>
         <MenuItem Header="_Справка" Click="OnHelp"/>
