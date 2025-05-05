@@ -33,6 +33,10 @@ namespace TFLandCOMP.ViewModels
         private void RunScan()
         {
             Errors.Clear();
+
+            if (string.IsNullOrWhiteSpace(InputText))
+                return;
+
             Lexer lexer = new Lexer();
             Parser parser = new Parser();
 
@@ -56,5 +60,6 @@ namespace TFLandCOMP.ViewModels
                 }
             }
         }
+
     }
 }
