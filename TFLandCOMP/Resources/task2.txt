@@ -1,0 +1,19 @@
+﻿Разработка грамматики
+2.1 Правила (P)
+1.	‹Def› → const ‹Id› : ‹Type› = ‹Number› ;
+2.	‹Id› → ‹Letter› ‹IdRem›
+3.	‹IdRem› → ‹Letter› ‹IdRem› | ε
+4.	‹Type› → f32 | f64
+5.	‹Number› → ‹Sign› ‹UnsignedInt› . ‹UnsignedInt›
+6.	‹Sign› → + | − | ε
+7.	‹UnsignedInt› → ‹Digit› ‹UnsignedInt› | ‹Digit›
+(Число обязано содержать хотя бы одну цифру до и после десятичной точки; знак «+»/«−» необязателен.)
+
+2.2 Дополнительные обозначения
+•	‹Digit› → “0” | “1” | … | “9”
+•	‹Letter› → “a” | … | “z” | “A” | … | “Z”
+
+2.3 Компоненты грамматики
+•	Z (стартовый символ) = ‹Def›
+•	VT (терминалы) = { const, :, f32, f64, =, ;, +, −, ., 0–9, a–z, A–Z }
+•	VN (нетерминалы) = { ‹Def›, ‹Id›, ‹IdRem›, ‹Type›, ‹Number›, ‹Sign›, ‹UnsignedInt› }

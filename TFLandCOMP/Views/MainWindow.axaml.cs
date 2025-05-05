@@ -20,6 +20,7 @@ using System.Xml;
 using TFLandCOMP.ViewModels;
 using SkiaSharp;
 using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace TFLandCOMP.Views
 {
@@ -405,6 +406,112 @@ namespace TFLandCOMP.Views
         }
 
 
+
+
+        private async void OnShowTask1(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task1.txt");
+            await ShowReportWindow(text, "Постановка задачи");
+        }
+
+        private async void OnShowTask2(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task2.txt");
+            await ShowReportWindow(text, "Разработка грамматики");
+        }
+
+        private async void OnShowTask3(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task3.txt");
+            await ShowReportWindow(text, "Классификация грамматики");
+        }
+
+        private async void OnShowTask4(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task4.txt");
+            await ShowReportWindow(text, "Метод анализа");
+        }
+
+        private async void OnShowTask5(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task5.txt");
+            await ShowReportWindow(text, "Диагностика и нейтрализация ошибок");
+        }
+        private async void OnShowTask6(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task6.txt");
+            await ShowReportWindow(text, "Lexer.cs");
+        }
+        private async void OnShowTask7(object sender, RoutedEventArgs e)
+        {
+            string text = ReadEmbeddedTextFile("task7.txt");
+            await ShowReportWindow(text, "Parser.cs");
+        }
+
+
+        private string ReadEmbeddedTextFile(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            string fullName = assembly.GetManifestResourceNames()
+                                      .FirstOrDefault(x => x.EndsWith(resourceName));
+            if (fullName == null)
+                return $"[Ошибка] Ресурс {resourceName} не найден";
+
+            using (Stream stream = assembly.GetManifestResourceStream(fullName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+
+        private async Task ShowReportWindow(string content, string title)
+        {
+            var window = new Window
+            {
+                Title = title,
+                Width = 600,
+                Height = 400,
+                Content = new ScrollViewer
+                {
+                    Content = new TextBlock
+                    {
+                        Text = content,
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        Margin = new Thickness(10)
+                    }
+                }
+            };
+
+            await window.ShowDialog(this);
+        }
+
+
+
+        private void OnInsertCorrectText(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                string correctText = "const pi: f32 = 3.14;";
+                SetTextInternal(fileEditor, correctText);
+                CurrentFileName = "Правильный текст";
+                isModified = true;
+            }
+        }
+
+        private void OnInsertIncorrectText(object sender, RoutedEventArgs e)
+        {
+            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
+            if (fileEditor != null)
+            {
+                string incorrectText = "constpi:f32=3.14;;";
+                SetTextInternal(fileEditor, incorrectText);
+                CurrentFileName = "Неправильный текст";
+                isModified = true;
+            }
+        }
+
         #region Обработка закрытия окна с диалогом сохранения
 
         protected override void OnClosing(WindowClosingEventArgs e)
@@ -424,7 +531,9 @@ namespace TFLandCOMP.Views
             {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
-            var result = await dialog.ShowDialog<SaveConfirmationResult>(this);
+            await dialog.ShowDialog(this);
+            var result = dialog.Result;
+
             if (result == SaveConfirmationResult.Yes)
             {
                 await OnSaveFileAsync();
@@ -435,10 +544,12 @@ namespace TFLandCOMP.Views
             else if (result == SaveConfirmationResult.No)
             {
                 isModified = false;
-
+                _forceClose = true;
                 Close();
             }
+            // Ничего не делаем, если Cancel
         }
+
 
         #endregion
 

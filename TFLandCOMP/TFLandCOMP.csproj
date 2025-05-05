@@ -16,6 +16,23 @@
 
   <ItemGroup>
     <None Remove="Highlighting\Rust.xshd" />
+    <None Remove="Resources\task1.txt" />
+    <None Remove="Resources\task2.txt" />
+    <None Remove="Resources\task3.txt" />
+    <None Remove="Resources\task4.txt" />
+    <None Remove="Resources\task5.txt" />
+    <None Remove="Resources\task6.txt" />
+    <None Remove="Resources\task7.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\task1.txt" />
+    <EmbeddedResource Include="Resources\task2.txt" />
+    <EmbeddedResource Include="Resources\task3.txt" />
+    <EmbeddedResource Include="Resources\task4.txt" />
+    <EmbeddedResource Include="Resources\task5.txt" />
+    <EmbeddedResource Include="Resources\task6.txt" />
+    <EmbeddedResource Include="Resources\task7.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,11 +68,9 @@
     <PackageReference Include="MessageBox.Avalonia" Version="3.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+      
     </PackageReference>
-    <PackageReference Include="Npgsql" Version="9.0.3" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+
     <PackageReference Include="OneWare.AvaloniaEdit" Version="11.2.0" />
     <PackageReference Include="OneWare.AvaloniaEdit.TextMate" Version="11.2.0" />
     <PackageReference Include="ReactiveUI" Version="20.1.63" />
