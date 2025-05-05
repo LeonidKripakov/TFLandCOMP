@@ -505,7 +505,7 @@ namespace TFLandCOMP.Views
             var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
             if (fileEditor != null)
             {
-                string incorrectText = "constpi:f32=3.14;;";
+                string incorrectText = "cont pi: frfhr32 = 3.14@4;";
                 SetTextInternal(fileEditor, incorrectText);
                 CurrentFileName = "Неправильный текст";
                 isModified = true;
