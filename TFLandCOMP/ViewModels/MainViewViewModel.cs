@@ -5,15 +5,15 @@ using CommunityToolkit.Mvvm.Input;
 
 using System.Collections.ObjectModel;
 
-
 using TFLandCOMP.Models;
-
+using TFLandCOMP.Services;
 
 namespace TFLandCOMP.ViewModels
 {
     public partial class MainViewViewModel : ObservableObject
     {
         public ObservableCollection<ErrorDetail> Errors { get; set; } = new ObservableCollection<ErrorDetail>();
+        public ObservableCollection<string> Quadruples { get; set; } = new ObservableCollection<string>();
 
         private string _inputText;
         public string InputText
@@ -29,19 +29,19 @@ namespace TFLandCOMP.ViewModels
             RunScanCommand = new RelayCommand(RunScan);
         }
 
-        // Использует Lexer и Parser для анализа входного текста.
         private void RunScan()
         {
             Errors.Clear();
+            Quadruples.Clear();
 
             if (string.IsNullOrWhiteSpace(InputText))
                 return;
 
-            Lexer lexer = new Lexer();
-            Parser parser = new Parser();
-
+            var lexer = new Lexer();
             var tokens = lexer.Lex(InputText);
-            var parseErrors = parser.ParseDeclarations(tokens, InputText);
+
+            var parser = new ExpressionParser();
+            var parseErrors = parser.Parse(tokens, InputText);
 
             if (parseErrors.Count == 0)
             {
@@ -51,6 +51,15 @@ namespace TFLandCOMP.ViewModels
                     ErrorMessage = "Ошибок не обнаружено",
                     Position = ""
                 });
+
+                var quadGen = new QuadrupleGenerator();
+                var quads = quadGen.Generate(tokens);
+
+                // корректная сортировка по приоритету операций
+                foreach (var q in quads)
+                {
+                    Quadruples.Add(q.ToString());
+                }
             }
             else
             {
@@ -60,6 +69,5 @@ namespace TFLandCOMP.ViewModels
                 }
             }
         }
-
     }
 }

@@ -11,12 +11,6 @@ namespace TFLandCOMP.Models
         public TokenType Type { get; }
         public string Value { get; }
         public int StartIndex { get; }
-        // Флаг, указывающий, что обнаружены недопустимые символы (например, в ключевом слове)
-        public bool InvalidKeyword { get; set; } = false;
-        // Строка с недопустимыми символами
-        public string InvalidCharacters { get; set; } = "";
-        // Флаг, сигнализирующий об отсутствии разделяющего пробела (например, между "const" и именем)
-        public bool MissingSpace { get; set; } = false;
 
         public Token(TokenType type, string value, int startIndex)
         {
@@ -28,15 +22,14 @@ namespace TFLandCOMP.Models
 
     public enum TokenType
     {
-        CONST,
         IDENTIFIER,
-        COLON,
-        TYPE,
-        EQUAL,
         NUMBER,
-        SEMICOLON,
-        INVALID_IDENTIFIER,
+        PLUS,
+        MINUS,
+        STAR,
+        SLASH,
+        LPAREN,
+        RPAREN,
         UNKNOWN
     }
-
 }

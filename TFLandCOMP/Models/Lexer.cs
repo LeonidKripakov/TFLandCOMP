@@ -1,21 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace TFLandCOMP.Models
 {
     public class Lexer
     {
-        // Регулярные выражения
-        private static readonly Regex CyrillicRegex = new Regex(@"\p{IsCyrillic}", RegexOptions.Compiled);
-        private static readonly Regex LatinLettersRegex = new Regex(@"^[A-Za-z]+$", RegexOptions.Compiled);
-
-        /// <summary>
-        /// Разбивает входной текст на токены согласно грамматике «const id : f32|f64 = [+|-]digits.digits ;».
-        /// </summary>
         public List<Token> Lex(string input)
         {
             var tokens = new List<Token>();
@@ -24,118 +14,54 @@ namespace TFLandCOMP.Models
             {
                 char c = input[i];
 
-                // Пропускаем пробельные символы
                 if (char.IsWhiteSpace(c))
                 {
                     i++;
                     continue;
                 }
 
-                // ---------- 1. Ключевые слова / идентификаторы ----------
                 if (char.IsLetter(c))
                 {
                     int start = i;
-                    while (i < input.Length && !char.IsWhiteSpace(input[i]) && ":=;".IndexOf(input[i]) == -1)
+                    while (i < input.Length && char.IsLetterOrDigit(input[i]))
                         i++;
+
                     string word = input.Substring(start, i - start);
-
-                    // «const»
-                    if (word == "const")
-                    {
-                        tokens.Add(new Token(TokenType.CONST, word, start));
-                        continue;
-                    }
-                    // «f32 | f64» (тип)
-                    if (word == "f32" || word == "f64")
-                    {
-                        tokens.Add(new Token(TokenType.TYPE, word, start));
-                        continue;
-                    }
-
-                    // ---------- проверка идентификатора ----------
-                    bool hasCyrillic = CyrillicRegex.IsMatch(word);
-                    bool isLatinOnly = LatinLettersRegex.IsMatch(word);
-
-                    if (hasCyrillic || !isLatinOnly)
-                    {
-                        tokens.Add(new Token(TokenType.INVALID_IDENTIFIER, word, start));
-                    }
-                    else
-                    {
-                        tokens.Add(new Token(TokenType.IDENTIFIER, word, start));
-                    }
+                    tokens.Add(new Token(TokenType.IDENTIFIER, word, start));
                     continue;
                 }
 
-                // ---------- 2. Числовой литерал со знаком ----------
-                if (c == '+' || c == '-')
-                {
-                    // Считаем, что знак может быть только перед числом
-                    if (i + 1 < input.Length && char.IsDigit(input[i + 1]))
-                    {
-                        int start = i;
-                        i++; // пропускаем знак
-                        ReadNumber(input, ref i);
-                        string num = input.Substring(start, i - start);
-                        tokens.Add(new Token(TokenType.NUMBER, num, start));
-                        continue;
-                    }
-                }
-
-                // ---------- 3. Число без знака ----------
                 if (char.IsDigit(c))
                 {
                     int start = i;
-                    ReadNumber(input, ref i);
-                    string num = input.Substring(start, i - start);
-                    tokens.Add(new Token(TokenType.NUMBER, num, start));
+                    while (i < input.Length && (char.IsDigit(input[i]) || input[i] == '.'))
+                        i++;
+
+                    string number = input.Substring(start, i - start);
+                    tokens.Add(new Token(TokenType.NUMBER, number, start));
                     continue;
                 }
 
-                // ---------- 4. Одиночные символы ----------
                 switch (c)
                 {
-                    case ':':
-                        tokens.Add(new Token(TokenType.COLON, ":", i));
-                        i++;
-                        break;
-                    case '=':
-                        tokens.Add(new Token(TokenType.EQUAL, "=", i));
-                        i++;
-                        break;
-                    case ';':
-                        tokens.Add(new Token(TokenType.SEMICOLON, ";", i));
-                        i++;
-                        break;
+                    case '+':
+                        tokens.Add(new Token(TokenType.PLUS, "+", i)); i++; break;
+                    case '-':
+                        tokens.Add(new Token(TokenType.MINUS, "-", i)); i++; break;
+                    case '*':
+                        tokens.Add(new Token(TokenType.STAR, "*", i)); i++; break;
+                    case '/':
+                        tokens.Add(new Token(TokenType.SLASH, "/", i)); i++; break;
+                    case '(':
+                        tokens.Add(new Token(TokenType.LPAREN, "(", i)); i++; break;
+                    case ')':
+                        tokens.Add(new Token(TokenType.RPAREN, ")", i)); i++; break;
                     default:
-                        tokens.Add(new Token(TokenType.UNKNOWN, c.ToString(), i));
-                        i++;
-                        break;
+                        tokens.Add(new Token(TokenType.UNKNOWN, c.ToString(), i)); i++; break;
                 }
             }
-            return tokens;
-        }
 
-        /// <summary>
-        /// Считывает последовательность digits '.' digits  (требуется хотя бы одна цифра до и после точки).
-        /// Указатель ref i выходит на символ-разделитель.
-        /// </summary>
-        private static void ReadNumber(string text, ref int i)
-        {
-            // читаем целую часть
-            while (i < text.Length && char.IsDigit(text[i]))
-                i++;
-            // должна быть точка
-            if (i < text.Length && text[i] == '.')
-            {
-                i++; // пропускаем точку
-                // читаем дробную часть
-                while (i < text.Length && char.IsDigit(text[i]))
-                    i++;
-            }
-            // до первого разделителя / пробела / спец‑символа (остановка в вызывающем коде)
-            while (i < text.Length && !char.IsWhiteSpace(text[i]) && ":=;".IndexOf(text[i]) == -1)
-                i++;
+            return tokens;
         }
     }
 }

@@ -86,7 +86,7 @@
                              FontSize="14"/>
     <!-- Заголовок для ошибок -->
     <TextBlock Text="Ошибки:" Margin="10,20,10,5"/>
-    <DataGrid ItemsSource="{Binding Errors}" Margin="10" Height="250" IsReadOnly="True" AutoGenerateColumns="False">
+    <DataGrid ItemsSource="{Binding Errors}" Margin="10"  IsReadOnly="True" AutoGenerateColumns="False">
       <DataGrid.Columns>
         <!-- Для каждой колонки указываем, что тип данных ErrorDetail находится в пространстве TFLandCOMP.Models -->
         <DataGridTextColumn Header="Код ошибки" Width="*">
@@ -106,5 +106,10 @@
         </DataGridTextColumn>
       </DataGrid.Columns>
     </DataGrid>
+
+    <!-- Заголовок для тетрадной формы -->
+    <TextBlock Text="Тетрадная форма :" Margin="10,20,10,5"/>
+    <ListBox ItemsSource="{Binding Quadruples}" Margin="10" Height="150"/>
+  
   </StackPanel>
 </Window>

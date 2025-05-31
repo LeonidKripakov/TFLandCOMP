@@ -1,19 +1,21 @@
-﻿Разработка грамматики
-2.1 Правила (P)
-1.	‹Def› → const ‹Id› : ‹Type› = ‹Number› ;
-2.	‹Id› → ‹Letter› ‹IdRem›
-3.	‹IdRem› → ‹Letter› ‹IdRem› | ε
-4.	‹Type› → f32 | f64
-5.	‹Number› → ‹Sign› ‹UnsignedInt› . ‹UnsignedInt›
-6.	‹Sign› → + | − | ε
-7.	‹UnsignedInt› → ‹Digit› ‹UnsignedInt› | ‹Digit›
-(Число обязано содержать хотя бы одну цифру до и после десятичной точки; знак «+»/«−» необязателен.)
+﻿2.1 Правила P (окончательная версия)
+		
+1	‹START› → const ‹CONST›	ключевое слово
+2	‹CONST› → ␠ ‹SPACE›	ровно один пробел после const*
+3	‹SPACE› → letter ‹ID›	идентификатор начинается с буквы
+4	‹ID› → letter ‹ID› | ‹TYPE›	буквы внутри ID или сразу переходим к типу
+5	‹TYPE› → f32 | f64 ‹EQUAL›	поддерживаем два типа
+6	‹EQUAL› → = ‹INT›	символ =
+7	‹INT› → digit ‹INTREM›	≥ 1 цифра перед точкой
+8	‹INTREM› → digit ‹INTREM› | . ‹FRAC›	целая часть может быть длинной
+9	‹FRAC› → digit ‹FRAC› | ;	≥ 1 цифра после точки, затем ;
 
-2.2 Дополнительные обозначения
+
+2.2 Дополнительные обозначения (без изменений)
 •	‹Digit› → “0” | “1” | … | “9”
 •	‹Letter› → “a” | … | “z” | “A” | … | “Z”
+2.3 Компоненты грамматики (обновлено)
+•	Z (стартовый символ) = ‹START›
+•	VT = { const, f32, f64, =, ;, ., 0–9, a–z, A–Z, ␠ }
+•	VN = { ‹START›, ‹CONST›, ‹SPACE›, ‹ID›, ‹TYPE›, ‹EQUAL›, ‹INT›, ‹INTREM›, ‹FRAC› }
 
-2.3 Компоненты грамматики
-•	Z (стартовый символ) = ‹Def›
-•	VT (терминалы) = { const, :, f32, f64, =, ;, +, −, ., 0–9, a–z, A–Z }
-•	VN (нетерминалы) = { ‹Def›, ‹Id›, ‹IdRem›, ‹Type›, ‹Number›, ‹Sign›, ‹UnsignedInt› }
