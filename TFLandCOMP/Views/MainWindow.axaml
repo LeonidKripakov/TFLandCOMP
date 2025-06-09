@@ -39,15 +39,15 @@
           <MenuItem Header="Вставить..." Click="OnPaste" Focusable="False"/>
         </MenuItem>
         <MenuItem Header="Текст">
-          <MenuItem Header="Вставить правильный текст" Click="OnInsertCorrectText"/>
-          <MenuItem Header="Вставить неправильный текст" Click="OnInsertIncorrectText"/>
-          <MenuItem Header="1. Постановка задачи" Click="OnShowTask1"/>
-          <MenuItem Header="2. Разработка грамматики" Click="OnShowTask2"/>
-          <MenuItem Header="3. Классификация грамматики" Click="OnShowTask3"/>
-          <MenuItem Header="4. Метод анализа" Click="OnShowTask4"/>
-          <MenuItem Header="5. Диагностика и нейтрализация ошибок" Click="OnShowTask5"/>
-          <MenuItem Header="6. Lexer.cs" Click="OnShowTask6"/>
-          <MenuItem Header="7. Parser.cs" Click="OnShowTask7"/>
+
+          <MenuItem Header="Поиск">
+            <MenuItem Header="Слова не заканчиваются на t/T"
+                      Click="OnFindWordsNotEndingWithT"/>
+            <MenuItem Header="Юзернеймы (a–z0–9 _- , 5–20)"
+                      Click="OnFindUsernames"/>
+            <MenuItem Header="Долгота (–180…180)"
+                      Click="OnFindLongitude"/>
+          </MenuItem>
         </MenuItem>
         <MenuItem Header="Пуск" Command="{Binding RunScanCommand}"/>
         <MenuItem Header="_Справка" Click="OnHelp"/>
@@ -84,27 +84,33 @@
                              Height="400"
                              VerticalAlignment="Stretch"
                              FontSize="14"/>
-    <!-- Заголовок для ошибок -->
-    <TextBlock Text="Ошибки:" Margin="10,20,10,5"/>
-    <DataGrid ItemsSource="{Binding Errors}" Margin="10" Height="250" IsReadOnly="True" AutoGenerateColumns="False">
-      <DataGrid.Columns>
-        <!-- Для каждой колонки указываем, что тип данных ErrorDetail находится в пространстве TFLandCOMP.Models -->
-        <DataGridTextColumn Header="Код ошибки" Width="*">
-          <DataGridTextColumn.Binding>
-            <Binding Path="ErrorCode" x:DataType="models:ErrorDetail"/>
-          </DataGridTextColumn.Binding>
-        </DataGridTextColumn>
-        <DataGridTextColumn Header="Текст ошибки" Width="2*">
-          <DataGridTextColumn.Binding>
-            <Binding Path="ErrorMessage" x:DataType="models:ErrorDetail"/>
-          </DataGridTextColumn.Binding>
-        </DataGridTextColumn>
-        <DataGridTextColumn Header="Место (Строка:Колонка)" Width="*">
-          <DataGridTextColumn.Binding>
-            <Binding Path="Position" x:DataType="models:ErrorDetail"/>
-          </DataGridTextColumn.Binding>
-        </DataGridTextColumn>
-      </DataGrid.Columns>
-    </DataGrid>
+    <!-- Вкладки: Ошибки / Результаты поиска -->
+    <TabControl Margin="10,20,10,0" >
+      <!-- Вкладка Ошибки -->
+      <TabItem Header="Ошибки">
+        <DataGrid ItemsSource="{Binding Errors}"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Код"    Binding="{Binding ErrorCode}"    Width="*"/>
+            <DataGridTextColumn Header="Сообщение" Binding="{Binding ErrorMessage}" Width="2*"/>
+            <DataGridTextColumn Header="Позиция"   Binding="{Binding Position}"     Width="*"/>
+          </DataGrid.Columns>
+        </DataGrid>
+      </TabItem>
+
+      <!-- Вкладка Результаты поиска -->
+      <TabItem Header="Результаты поиска">
+        <DataGrid ItemsSource="{Binding Matches}"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Вхождение" Binding="{Binding Value}" Width="2*"/>
+            <DataGridTextColumn Header="Индекс"    Binding="{Binding Index}" Width="*"/>
+          </DataGrid.Columns>
+        </DataGrid>
+      </TabItem>
+    </TabControl>
+
   </StackPanel>
 </Window>

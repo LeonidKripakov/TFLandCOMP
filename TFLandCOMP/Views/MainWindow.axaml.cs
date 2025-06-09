@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -20,7 +21,6 @@ using System.Xml;
 using TFLandCOMP.ViewModels;
 using SkiaSharp;
 using System.Net.NetworkInformation;
-using System.Linq;
 
 namespace TFLandCOMP.Views
 {
@@ -42,19 +42,14 @@ namespace TFLandCOMP.Views
             }
         }
 
-
         private void LoadRustSyntaxHighlighting(TextEditor editor)
         {
             //var assembly = Assembly.GetExecutingAssembly();
-
             //using (Stream s = assembly.GetManifestResourceStream("TFLandCOMP.Highlighting.Rust.xshd"))
             //{
             //    using var reader = XmlReader.Create(s);
-
             //    editor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
             //}
-
-            
         }
 
         private Stack<(string text, int caretIndex)> undoStack = new Stack<(string text, int caretIndex)>();
@@ -75,8 +70,7 @@ namespace TFLandCOMP.Views
             var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
             if (fileEditor != null)
             {
-                LoadRustSyntaxHighlighting(fileEditor); 
-               
+                LoadRustSyntaxHighlighting(fileEditor);
                 fileEditor.PointerWheelChanged += FileEditor_PointerWheelChanged;
                 fileEditor.TextChanged += (s, e) =>
                 {
@@ -288,7 +282,6 @@ namespace TFLandCOMP.Views
                     redoStack.Clear();
                     SetTextInternal(fileEditor, fileEditor.Text.Insert(caret, clipboardText));
                     fileEditor.CaretOffset = caret + clipboardText.Length;
-                    // Фиксируем последнее действие – вставка
                     lastAction = (LastActionType.Insert, clipboardText, caret);
                 }
             }
@@ -358,14 +351,9 @@ namespace TFLandCOMP.Views
             isInternalUpdate = false;
         }
 
-
-
-
         #endregion
 
-
-
-        // Метод для вызова окна со справкой
+        // Метод для вызова окна справки
         private async void OnHelp(object sender, RoutedEventArgs e)
         {
             string helpText = "Окно справки\n\n" +
@@ -385,8 +373,7 @@ namespace TFLandCOMP.Views
                 "• Нумерация строк: Наличие номеров строк для удобной навигации и поиска ошибок.\n" +
                 "• Вывод ошибок: Ошибки отображаются в виде таблицы, что позволяет быстро находить и устранять их.\n";
 
-            // Создаем новое окно для справки с прокручиваемым содержимым
-            Window helpWindow = new Window
+            var helpWindow = new Window
             {
                 Title = "Справка",
                 Width = 600,
@@ -401,119 +388,38 @@ namespace TFLandCOMP.Views
                     }
                 }
             };
-
             await helpWindow.ShowDialog(this);
         }
 
+        // Методы для отображения задач
+        private async void OnShowTask1(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask2(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask3(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask4(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask5(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask6(object sender, RoutedEventArgs e) { /*...*/ }
+        private async void OnShowTask7(object sender, RoutedEventArgs e) { /*...*/ }
 
-
-
-        private async void OnShowTask1(object sender, RoutedEventArgs e)
+        // Новые обработчики поиска по regex
+        private void OnFindWordsNotEndingWithT(object sender, RoutedEventArgs e)
         {
-            string text = ReadEmbeddedTextFile("task1.txt");
-            await ShowReportWindow(text, "Постановка задачи");
+            if (DataContext is MainViewViewModel vm)
+                vm.FindWordsNotEndingWithTCommand.Execute(null);
         }
 
-        private async void OnShowTask2(object sender, RoutedEventArgs e)
+        private void OnFindUsernames(object sender, RoutedEventArgs e)
         {
-            string text = ReadEmbeddedTextFile("task2.txt");
-            await ShowReportWindow(text, "Разработка грамматики");
+            if (DataContext is MainViewViewModel vm)
+                vm.FindUsernamesCommand.Execute(null);
         }
 
-        private async void OnShowTask3(object sender, RoutedEventArgs e)
+        private void OnFindLongitude(object sender, RoutedEventArgs e)
         {
-            string text = ReadEmbeddedTextFile("task3.txt");
-            await ShowReportWindow(text, "Классификация грамматики");
-        }
-
-        private async void OnShowTask4(object sender, RoutedEventArgs e)
-        {
-            string text = ReadEmbeddedTextFile("task4.txt");
-            await ShowReportWindow(text, "Метод анализа");
-        }
-
-        private async void OnShowTask5(object sender, RoutedEventArgs e)
-        {
-            string text = ReadEmbeddedTextFile("task5.txt");
-            await ShowReportWindow(text, "Диагностика и нейтрализация ошибок");
-        }
-        private async void OnShowTask6(object sender, RoutedEventArgs e)
-        {
-            string text = ReadEmbeddedTextFile("task6.txt");
-            await ShowReportWindow(text, "Lexer.cs");
-        }
-        private async void OnShowTask7(object sender, RoutedEventArgs e)
-        {
-            string text = ReadEmbeddedTextFile("task7.txt");
-            await ShowReportWindow(text, "Parser.cs");
-        }
-
-
-        private string ReadEmbeddedTextFile(string resourceName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            string fullName = assembly.GetManifestResourceNames()
-                                      .FirstOrDefault(x => x.EndsWith(resourceName));
-            if (fullName == null)
-                return $"[Ошибка] Ресурс {resourceName} не найден";
-
-            using (Stream stream = assembly.GetManifestResourceStream(fullName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
-        }
-
-
-        private async Task ShowReportWindow(string content, string title)
-        {
-            var window = new Window
-            {
-                Title = title,
-                Width = 600,
-                Height = 400,
-                Content = new ScrollViewer
-                {
-                    Content = new TextBlock
-                    {
-                        Text = content,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                        Margin = new Thickness(10)
-                    }
-                }
-            };
-
-            await window.ShowDialog(this);
-        }
-
-
-
-        private void OnInsertCorrectText(object sender, RoutedEventArgs e)
-        {
-            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
-            if (fileEditor != null)
-            {
-                string correctText = "const pi: f32 = 3.14;";
-                SetTextInternal(fileEditor, correctText);
-                CurrentFileName = "Правильный текст";
-                isModified = true;
-            }
-        }
-
-        private void OnInsertIncorrectText(object sender, RoutedEventArgs e)
-        {
-            var fileEditor = this.FindControl<TextEditor>("fileTextEditor");
-            if (fileEditor != null)
-            {
-                string incorrectText = "cont pi: frfhr32 = 3.14@4;";
-                SetTextInternal(fileEditor, incorrectText);
-                CurrentFileName = "Неправильный текст";
-                isModified = true;
-            }
+            if (DataContext is MainViewViewModel vm)
+                vm.FindLongitudeCommand.Execute(null);
         }
 
         #region Обработка закрытия окна с диалогом сохранения
-
         protected override void OnClosing(WindowClosingEventArgs e)
         {
             if (!_forceClose && isModified)
@@ -533,7 +439,6 @@ namespace TFLandCOMP.Views
             };
             await dialog.ShowDialog(this);
             var result = dialog.Result;
-
             if (result == SaveConfirmationResult.Yes)
             {
                 await OnSaveFileAsync();
@@ -547,18 +452,14 @@ namespace TFLandCOMP.Views
                 _forceClose = true;
                 Close();
             }
-            // Ничего не делаем, если Cancel
+            // Cancel ничего не делает
         }
-
-
         #endregion
 
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        #endregion
     }
 }
-
-
-
-
